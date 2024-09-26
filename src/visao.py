@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Rodrigo Kurosawa
 import cv2
 import numpy as np
 import rospy
