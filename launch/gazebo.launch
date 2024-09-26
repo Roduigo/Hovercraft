@@ -1,7 +1,7 @@
 
   <launch>
   <arg name="model" default="$(find project_ws)/urdf/description.urdf"/>
-	<arg name="world" default="$(find project_ws)/worlds/empty.world" />
+	<arg name="world" default="$(find project_ws)/worlds/obstacles.world" />
 
 	<!-- Inclui o arquivo de inicialização do Gazebo, fornecido pelo pacote gazebo_ros -->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
