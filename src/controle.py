@@ -51,4 +51,5 @@ class ContVelocidade:
 if __name__ == '__main__':
     rospy.init_node('move_and_turn', anonymous=False) #Inicializa o nó do ROS
     sv = ContVelocidade()
-    rospy.spin() #mantém o nó ativo
+    rospy.spin() #mantém o nó ativo 
+    #felipepombo
