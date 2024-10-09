@@ -1,5 +1,6 @@
+''' Codigo de controle, tentativa n1:
+MANCADA TESTE GIT
 #!/usr/bin/env python3
-# Rodrigo Kurosawa
 import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Image
@@ -15,6 +16,10 @@ class ContVelocidade:
         self.rate = rospy.Rate(10)
         self.tolerance = 20
         self.distancia = 4000000 # distancia em quantidade de pixels para parar o robo
+        self.is_moving = False # Flag para verificar se o robô está se movendo
+        self.angular_gain = 0.001 # Ganho do controle angular
+        self.linear_gain = 0.01 # Ganho do controle linear
+        self.filtered_distance = 0 # Distância filtrada
         
     def callback(self, data):
         setpoint = data
@@ -25,23 +30,26 @@ class ContVelocidade:
         
         if abs(data.x) > self.tolerance:
             # Calcula a velocidade angular proporcional à distância do setpoint ao centro
-            self.msg_vel.angular.z = (data.x) / 700  # Fator de escala para alterar a velocidade angular
+            self.msg_vel.angular.z = (data.x) * self.angular_gain  # Fator de escala para alterar a velocidade angular
 
             # Publica a nova velocidade angular
-            rospy.loginfo(f"distancia ao centro da tela{data.x}")
+            rospy.loginfo(f"distancia ao centro da tela {data.x}")
             rospy.loginfo(f"Ajustando rotação: angular.z={self.msg_vel.angular.z}")
             self.pub.publish(self.msg_vel)
+            self.is_moving = True
         else:
             # Se o setpoint estiver centralizado, parar o robô
             self.msg_vel.angular.z = 0
             rospy.loginfo("Setpoint centralizado, parando o robô")
             self.pub.publish(self.msg_vel)
+            self.is_moving = False
         
     def callback_distancia(self, data): #calcula a distancia com base na quantidade de pixels na tela
-        distancia = data.data
+        raw_distance = data.data
+        self.filtered_distance = 0.9 * self.filtered_distance + 0.1 * raw_distance # Filtro de média móvel
         self.msg_vel = Twist()
-        if distancia < self.distancia:
-            self.msg_vel.linear.x = 2
+        if self.filtered_distance < self.distancia and not self.is_moving:
+            self.msg_vel.linear.x = 2 * self.linear_gain
             rospy.loginfo("Ajustando a velocidade linear para frente")
             self.pub.publish(self.msg_vel)
         else: 
@@ -53,4 +61,6 @@ if __name__ == '__main__':
     rospy.init_node('move_and_turn', anonymous=False) #Inicializa o nó do ROS
     sv = ContVelocidade()
     rospy.spin() #mantém o nó ativo 
-    #felipepombo
+'''
+
+
