@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-# Rodrigo Kurosawa
+
 import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Image
+from std_msgs.msg import Int32MultiArray
 from std_msgs.msg import Int32
 from geometry_msgs.msg import Point
 
 class ContVelocidade:
     def __init__(self):
-        self.msg_vel = Twist()
-        self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+        self.pub = rospy.Publisher('/velocidade', Int32MultiArray, queue_size=10)
         self.sub = rospy.Subscriber('/setpoint', Point, self.callback)
         self.distancia_sub = rospy.Subscriber('/distancia', Int32, self.callback_distancia)
         self.rate = rospy.Rate(10)
@@ -19,23 +19,28 @@ class ContVelocidade:
     def callback(self, data):
         setpoint = data
         
-        self.msg_vel = Twist() #cria um objeto do tipo Twist para alterar a velocidade
-        
-        # Define a velocidade linear e angular para ajustar o setpoint do robo
+        msg = Int32MultiArray()
         
         if abs(data.x) > self.tolerance:
             # Calcula a velocidade angular proporcional à distância do setpoint ao centro
-            self.msg_vel.angular.z = (data.x) / 700  # Fator de escala para alterar a velocidade angular
-
+            if(setpoint<0):
+                dir = 30
+                esq = 0
+            
+            else:
+                dir = 0
+                esq = 30
             # Publica a nova velocidade angular
-            rospy.loginfo(f"distancia ao centro da tela{data.x}")
-            rospy.loginfo(f"Ajustando rotação: angular.z={self.msg_vel.angular.z}")
-            self.pub.publish(self.msg_vel)
+            rospy.loginfo(f"distancia ao centro da tela{setpoint}")
+            msg.vel = [dir,esq]
+            self.pub.publish(msg.vel)
         else:
             # Se o setpoint estiver centralizado, parar o robô
-            self.msg_vel.angular.z = 0
+            dir = 25
+            esq = 25
             rospy.loginfo("Setpoint centralizado, parando o robô")
-            self.pub.publish(self.msg_vel)
+            msg.vel = [dir,esq]
+            self.pub.publish(msg.vel)
         
     def callback_distancia(self, data): #calcula a distancia com base na quantidade de pixels na tela
         distancia = data.data

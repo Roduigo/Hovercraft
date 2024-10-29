@@ -41,10 +41,17 @@
     type="joint_state_publisher">
   </node>
 
-  <node 
+  <!-- <node 
+    pkg="project_ws" 
+    type="visao.py" 
+    name="visao" 
+    output="screen">
+  </node> -->
+
+  <!-- <node 
     type="rviz" 
     name="rviz" 
     pkg="rviz" 
-    args="-d $(find project_ws)/rviz/urdf.rviz" />
+    args="-d $(find project_ws)/rviz/urdf.rviz" /> -->
 </launch>
 
