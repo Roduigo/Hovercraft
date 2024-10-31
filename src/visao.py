@@ -16,7 +16,8 @@ class ImageConverter:
         cv2.createTrackbar('B', 'RGB Trackbars', 0, 255, self.nothing)
         cv2.createTrackbar('Tolerancia', 'RGB Trackbars', 20, 100, self.nothing)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.callback)
+        # self.image_sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.callback)
+        self.image = cv2.VideoCapture(0)
         self.setpoint_pub = rospy.Publisher("/setpoint", Point, queue_size=10)
         self.image_pub = rospy.Publisher("/camera/image_processed", Image, queue_size=10)
         self.distancia_pub = rospy.Publisher("/distancia", Int32, queue_size=10)
@@ -25,7 +26,7 @@ class ImageConverter:
             pass 
         
     def callback(self, data):
-        frame = self.bridge.imgmsg_to_cv2(data, "bgr8")
+        frame = self.bridge.imgmsg_to_cv2(self.image, "bgr8")
         
         # cria uma imagem preta com height = 300, width = 512
         img = np.zeros((300, 512, 3), np.uint8)
