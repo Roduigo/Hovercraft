@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(project_ws)
+project(hovercraft)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -11,17 +11,26 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  diff_drive_controller
-  controller_manager
+  geometry_msgs
   cv_bridge 
-  image_transport 
- 	
- 
+  sensor_msgs
+  message_generation #pacote que cria novos tipos de mensagens
+)
+
+add_message_files(
+  FILES
+  #add files .msg here
+)
+
+#dependencias necessárias para gerar a mensagem personalizada
+generate_messages(
+  DEPENDENCIES
+  std_msgs
 )
 
 find_package(OpenCV REQUIRED)
 
-catkin_package()
+catkin_package(CATKIN_DEPENDS message_runtime)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
