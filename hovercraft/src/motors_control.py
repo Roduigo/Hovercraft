@@ -74,6 +74,7 @@ class ESC:
         # Pulsos de 1ms a 2ms são mapeados para valores de duty cycle entre 5%(parado) e 10%(vel max) em uma frequência de 50Hz.
         #Isso corresponde a pulsos de 2ms e 1ms para a freq de 50Hz. Geralmente, esses são os pulsos esperados pela ESC.
         pwm_value = self.map_speed_to_pwm(speed)
+        self.pi.set_PWM_range(0,100)
         self.pi.set_PWM_dutycycle(self.pwm_pin,pwm_value)
 
     def stop(self):
@@ -90,11 +91,10 @@ class ESC:
         # Mapeia a velocidade de 0 a 100 para duty cycle entre 5% e 10%
         # 5% duty cycle -> 1ms (ESC parada)
         # 10% duty cycle -> 2ms (ESC a toda velocidade)
-        return int((5 * speed / 100) + 5) * (255 / 100) #pigpio só aceita valores entre 0 e 255
+        return int((5 * speed / 100) + 5)
 
     def cleanup(self):
         # Limpa a configuração dos pinos 
-        self.stop()
         self.pi.stop()
         #quando mudar biblioteca, fazer método de desligar hover
 

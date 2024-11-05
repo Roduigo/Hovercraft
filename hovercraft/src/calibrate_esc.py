@@ -41,8 +41,6 @@ class Hover:
             #motor direita (pino 2)
             self.esc2.set_speed(100)
 
-
-
 class ESC:
     def __init__(self, pwm_pin, freq=50):
        
@@ -86,6 +84,7 @@ class ESC:
 
     def cleanup(self):
         # Limpa a configuração dos pinos GPIO
+        self.stop()
         self.pwm.stop()
         GPIO.cleanup()
         #quando mudar biblioteca, fazer método de desligar hover
