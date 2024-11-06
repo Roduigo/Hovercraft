@@ -24,22 +24,26 @@ class Hover:
         dir = velocidade[0]
         esq = velocidade[1]
         #COMO FAZER PARA DIFERENCIAR ESC1 E ESC2 NO SET_SPEED???????
-        if dir > esq:
-            #Motor esquerda (pino 1)
-            self.esc1.set_speed(70)
-            #motor direita (pino 2)
-            self.esc2.set_speed(30)
-        elif esq > dir:
-            #Motor esquerda (pino 1)
-            self.esc1.set_speed(30)
-            #motor direita (pino 2)
-            self.esc2.set_speed(70)
-        else:
-            #Motor esquerda (pino 1)
-            self.esc1.set_speed(100)
-            #motor direita (pino 2)
-            self.esc2.set_speed(100)
-            
+        # if dir > esq:
+        #     #Motor esquerda (pino 1)
+        #     self.esc1.set_speed(esq)
+        #     #motor direita (pino 2)
+        #     self.esc2.set_speed(dir)
+        # elif esq > dir:
+        #     #Motor esquerda (pino 1)
+        #     self.esc1.set_speed(esq)
+        #     #motor direita (pino 2)
+        #     self.esc2.set_speed(dir)
+        # else:
+        #     #Motor esquerda (pino 1)
+        #     self.esc1.set_speed(esq)
+        #     #motor direita (pino 2)
+        #     self.esc2.set_speed(dir)
+        #Motor esquerda (pino 1)
+        self.esc1.set_speed(esq)
+        #motor direita (pino 2)
+        self.esc2.set_speed(dir)
+        
     def cleanup(self):
         self.esc1.cleanup()
         self.esc2.cleanup()

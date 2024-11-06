@@ -5,7 +5,7 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Image
 from std_msgs.msg import Int32
 from geometry_msgs.msg import Point
-from PID import PID
+from hovercraft.src.PID import PID
 
 class ContVelocidade:
     def __init__(self):
