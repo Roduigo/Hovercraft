@@ -18,6 +18,13 @@ class ImageConverter:
         self.bridge = CvBridge()
         # self.image_sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.callback)
         self.image = cv2.VideoCapture(0)
+
+        #Dá um tamanho limitado para a resolução da câmera
+        largura = 640
+        altura = 480
+        self.image.set(cv2.CAP_PROP_FRAME_WIDHT, largura)
+        self.image.set(cv2.CAP_PROP_FRAME_HEIGHT, altura)
+
         self.setpoint_pub = rospy.Publisher("/setpoint", Point, queue_size=10)
         self.image_pub = rospy.Publisher("/camera/image_processed", Image, queue_size=10)
         self.distancia_pub = rospy.Publisher("/distancia", Int32, queue_size=10)
