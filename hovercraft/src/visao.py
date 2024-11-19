@@ -15,6 +15,11 @@ class ImageConverter:
         cv2.createTrackbar('G', 'RGB Trackbars', 0, 255, self.nothing)
         cv2.createTrackbar('B', 'RGB Trackbars', 0, 255, self.nothing)
         cv2.createTrackbar('Tolerancia', 'RGB Trackbars', 20, 100, self.nothing)
+        #Define valor inicial pra trackbar
+        cv2.setTrackbarPos('R', 'RGB Trackbars', 160)
+        cv2.setTrackbarPos('G', 'RGB Trackbars', 10)
+        cv2.setTrackbarPos('B', 'RGB Trackbars', 40)
+        cv2.setTrackbarPos('Tolerancia', 'RGB Trackbars', 60)
         self.bridge = CvBridge()
         # self.image_sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.callback)
         self.image = cv2.VideoCapture(0)
