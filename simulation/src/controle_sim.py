@@ -17,9 +17,9 @@ class ContVelocidade:
         self.dist = 0
         self.referencia = 10000000 # distancia em quantidade de pixels para parar o robo
         
-        self.PID_giro = PID(1/600,1/600, 1/1500, 1/20) #Ku = 1/50, Tu = 2s
+        self.PID_giro = PID(1/600,0, 0, 1/30) #Ku = 1/50, Tu = 2s
         self.PID_frente = PID(1/8000000,0,0,1/30,0, 100) #Ku = 1/2500000, Tu = 2s
-      #1/5000000 6/25000000, 3/50000000
+        #1/5000000 6/25000000, 3/50000000
         
     def callback(self, data):
         setpoint_giro = data.x 

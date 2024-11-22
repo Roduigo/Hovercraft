@@ -37,9 +37,9 @@ class PID:
         if self._max_output is not None and self._min_output is not None: 
             output = max(min(output, self._max_output), self._min_output) #garantir que não vai ultrapassar os limites
         
-        if self._max_output is not None and (self.Ki != 0):
+        if self._max_output is not None and self.Ki != 0:
             self.sum = min(self.sum, self._max_output / (self.Ki * self.sample_time)) # caso ultrapasse o limite superior, retira o integrativo atual
-        if self._min_output is not None and (self.Ki != 0):
+        if self._min_output is not None and self.Ki != 0:
             self.sum = max(self.sum, self._min_output / (self.Ki * self.sample_time)) # caso ultrapasse o limite inferior, retira o integrativo atual
 
         self.last_error = self.error

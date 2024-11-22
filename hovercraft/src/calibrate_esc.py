@@ -93,4 +93,3 @@ if __name__ == '__main__':
     rospy.init_node('ESC Motores', anonymous=False) #Inicializa o nó do ROS
     pao = Hover(18, 19, 50) #pino 1, pino 2, freq 
     rospy.spin() #mantém o nó ativo 
-    #luisa_santello

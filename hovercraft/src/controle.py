@@ -3,61 +3,92 @@
 import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Image
-from std_msgs.msg import Int32MultiArray
+from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Int32
+from sensor_msgs.msg import Imu
+from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point
+from PID import PID
+import math
 
 class ContVelocidade:
     def __init__(self):
-        self.vel = Int32MultiArray()
-        self.pub = rospy.Publisher('/velocidade', Int32MultiArray, queue_size=10)
-        self.sub = rospy.Subscriber('/setpoint', Point, self.callback)
-        self.distancia_sub = rospy.Subscriber('/distancia', Int32, self.callback_distancia)
+        self.vel = Float32MultiArray()
+        self.pub = rospy.Publisher('/velocidade', Float32MultiArray, queue_size=3000)
+        self.sub = rospy.Subscriber('/setpoint', Point, self.angular)
+        self.distancia_sub = rospy.Subscriber('/distancia', Int32, self.distancia)
+        self.yaw = rospy.Subscriber("/mavros/imu/data", Imu, self.vel_control)
         self.rate = rospy.Rate(10)
-        self.tolerance = 20
-        self.distancia = 4000000 # distancia em quantidade de pixels para parar o robo
+        self.dist = 0
+        self.rot = 0
+        self.frente = 0
+        self.referencia = 10000000 # distancia em quantidade de pixels para parar o robo
+        self.min_pixels = 10000 #valor minínimo para o robo ainda identificar objeto
+        self.setpoint_giro = 0
+        # parametros da camera
+        self.freq_cam = 30
+        self.altura = 480
+        self.largura = 640
+        self.fov = 53.423480767872312502265 # campo de visão da camera calculado na diagonal
         
-    def callback(self, data):
-        setpoint = data
+        self.k_graus = self.fov / self.largura #constante graus / pixeis
         
-        self.vel = Int32MultiArray()
+        self.PID_giro = PID(1/600,0, 0, 1/self.freq_cam)
+        self.PID_frente = PID(7/800000,0,0,1/self.freq_cam,0 ,100) 
+        #valores entre 1/80000 e 1/800000
         
-        if abs(data.x) > self.tolerance:
-            # Calcula a velocidade angular proporcional à distância do setpoint ao centro
-            if(setpoint<0):
-                dir = 30
-                esq = 0
-            else:
-                dir = 0
-                esq = 30
-            # Publica a nova velocidade angular
-            rospy.loginfo(f"distancia ao centro da tela{setpoint}")
-            self.vel = [dir,esq]
-            self.pub.publish(self.vel)
+    def vel_control(self, data): #callback do yaw da px4
+        
+        self.vel = Float32MultiArray()#cria um objeto do tipo Twist para alterar a velocidade
+        
+        ########## FRENTE ###########
+        setpoint_frente = self.referencia - self.dist
+
+        self.frente = self.PID_frente.compute(setpoint_frente)
+        
+        if(self.dist < self.min_pixels): # limite minimo de pixeis que precisa para robo ir para frente
+            self.vel.data = [0,0]
+            rospy.loginfo(f"Nenhum objeto detectado. Quantidade de pixels:{self.min_pixels}")
         else:
-            # Se o setpoint estiver centralizado, parar o robô
-            dir = 30
-            esq = 30
-            rospy.loginfo("Setpoint centralizado, parando o robô")
-            self.vel = [dir,esq]
-            self.pub.publish(self.vel)
+            self.vel.data = [self.frente,self.frente]
+            rospy.loginfo(f"Ajustando a velocidade linear para frente={self.frente}")
+    
+        ########## GIRO ###########
+    
+        yaw = convert_graus(data)
         
-    def callback_distancia(self, data): #calcula a distancia com base na quantidade de pixels na tela
-        distancia = data
-        self.vel = Int32MultiArray()
-        if distancia < self.distancia:
-            dir = 30
-            esq = 30
-            rospy.loginfo("Ajustando a velocidade linear para frente")
-            self.pub.publish(self.vel)
-        else: 
-            esq = 0
-            dir = 0
-            rospy.loginfo("Parando o robô")
-            self.pub.publish(self.vel)
+        # o PID vai retornar a direção em que o robo deverá girar
+        self.rot = self.PID_giro.compute(setpoint) # calcula o o setpoint em graus e joga no PID 
+        
+        if(self.rot>0):
+            self.vel.data[0] -= abs(self.rot)
+        else:
+            self.vel.data[1] -= abs(self.rot)
+            
+        ######### PUBLICA #########
+        
+        self.pub.publish(self.vel)
+        rospy.loginfo(f"distancia ao centro da tela{setpoint_giro}")
+        rospy.loginfo(f"Ajustando rotação: angular.z = dir {self.vel.data[0]} esq = {self.vel.data[1]}")
+        
+    def convert_graus(self, valor):
+        orientation = valor.orientation
+        quaternion = [orientation.x,orientation.y,orientation.z,orientation.w]
+        roll, pitch, yaw = euler_from_quaternion(quaternion)
+        yaw *= 360/(2*math.pi)
+        return yaw
+
+    # função para apenas inicializar a variável distancia. Obs: a atribuição é a quantidade de pixeis
+    def distancia(self,data):
+        dist32 = data
+        self.dist = int(dist32.data)
+        
+    def angular(self,data):
+        self.setpoint_giro = data.x * self.k_graus #setpoint da camera dado em graus
         
 if __name__ == '__main__':
     rospy.init_node('move_and_turn', anonymous=False) #Inicializa o nó do ROS
     sv = ContVelocidade()
     rospy.spin() #mantém o nó ativo 
     #felipepombo
+
